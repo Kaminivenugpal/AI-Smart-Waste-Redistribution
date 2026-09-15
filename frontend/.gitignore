@@ -1,0 +1,17 @@
+node_modules/
+frontend/node_modules/
+
+target/
+backend/target/
+
+__pycache__/
+*.pyc
+.venv/
+
+.vscode/
+.idea/
+
+.env
+*.env
+
+uploads/
