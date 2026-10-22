@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -83,9 +85,12 @@ public class ItemService {
         return itemRepository.findByDonorIdOrderByCreatedAtDesc(donorId);
     }
 
-    public ItemResponse getItemDetails(Long itemId) {
+    public ItemResponse getItemDetails(Long itemId, Long donorId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found with ID: " + itemId));
+        if (!item.getDonor().getId().equals(donorId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found with ID: " + itemId);
+        }
         AnalysisResult analysis = analysisResultRepository.findByItemId(itemId).orElse(null);
 
         return ItemResponse.builder()

@@ -3,14 +3,16 @@ import { AuthContext } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { UserPlus, User, Mail, Lock, Phone, MapPin, AlertCircle, ArrowRight } from 'lucide-react';
 
-const Register = ({ setActiveTab }) => {
-  const { loginUser } = useContext(AuthContext);
+const Register = ({ setActiveTab, portal = 'donor' }) => {
+  const { loginUser, loginReceiver } = useContext(AuthContext);
+  const isReceiver = portal === 'receiver';
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     phone: '',
-    location: ''
+    location: '',
+    organizationName: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,9 +32,20 @@ const Register = ({ setActiveTab }) => {
 
     setLoading(true);
     try {
-      const response = await authService.register(formData);
-      if (response.success && response.donor) {
-        loginUser(response.donor);
+      const response = isReceiver
+        ? await authService.registerReceiver(formData)
+        : await authService.register(formData);
+      const account = isReceiver ? response.receiver : response.donor;
+      if (response.success && account) {
+        if (!response.token) {
+          setError('Authentication token missing from server response.');
+          return;
+        }
+        if (isReceiver) {
+          loginReceiver(account, response.token);
+        } else {
+          loginUser(account, response.token);
+        }
         setActiveTab('dashboard');
       } else {
         setError(response.message || 'Registration failed.');
@@ -63,7 +76,9 @@ const Register = ({ setActiveTab }) => {
           }}>
             <UserPlus size={26} />
           </div>
-          <h2 style={{ fontSize: '1.5rem', color: '#ffffff' }}>Create Donor Account</h2>
+          <h2 style={{ fontSize: '1.5rem', color: '#ffffff' }}>
+            {isReceiver ? 'Create Receiver / NGO Account' : 'Create Donor Account'}
+          </h2>
           <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: '0.3rem' }}>
             Join the AI Waste Redistribution Platform
           </p>
@@ -138,6 +153,22 @@ const Register = ({ setActiveTab }) => {
               <Lock size={18} style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
             </div>
           </div>
+
+          {isReceiver && (
+            <div className="form-group">
+              <label>Organization / NGO Name</label>
+              <input
+                type="text"
+                name="organizationName"
+                className="form-control"
+                placeholder="Organization name (optional)"
+                value={formData.organizationName}
+                onChange={handleChange}
+                style={{ width: '100%' }}
+                maxLength={150}
+              />
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { itemService } from '../services/api';
+import DonorRequestsPanel from './DonorRequestsPanel';
 import { 
   Package, PlusCircle, Sparkles, Activity, Layers, 
   MapPin, Clock, CheckCircle2, ShieldCheck, RefreshCw 
@@ -88,6 +89,8 @@ const DonorDashboard = ({ onNavigateToAdd, onViewResult }) => {
       </div>
 
       {/* Items Section */}
+      <DonorRequestsPanel />
+
       <div className="glass-panel" style={{ padding: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h2 style={{ fontSize: '1.3rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

@@ -54,6 +54,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Spring Security — used only for BCryptPasswordEncoder; HTTP security disabled in SecurityConfig -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- Spring Boot Starter Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

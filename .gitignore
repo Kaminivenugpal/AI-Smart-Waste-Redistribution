@@ -1,12 +1,66 @@
-backend/target/
-frontend/node_modules/
-frontend/dist/
-__pycache__/
-*.pyc
-.venv/
-venv/
-.vscode/
-.idea/
+# ============================================================
+#  AI Smart Waste Redistribution Platform — .gitignore
+# ============================================================
+
+# ── Secrets & local configuration ──────────────────────────
+# IMPORTANT: application.properties was committed in Git history
+# at commits 869cc41 and de3bd42. The DB password in that file
+# is considered exposed. Safe remediation steps:
+#   1. git rm --cached backend/src/main/resources/application.properties
+#   2. git commit -m "Untrack secrets file — see application.properties.example"
+#   3. Rotate the MySQL password:
+#        mysql -u root -p
+#        ALTER USER 'root'@'localhost' IDENTIFIED BY '<new-password>';
+#        FLUSH PRIVILEGES;
+#      Do NOT pass the new password on the command line.
+#   4. Update your local application.properties only (never commit it).
+# After step 1, this .gitignore prevents future re-tracking.
+backend/src/main/resources/application.properties
+
+# Environment files
 .env
 *.env
+mobile/.env
+
+# ── Java / Maven ────────────────────────────────────────────
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# ── Node.js / React Frontend ────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── Python AI Service ───────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+ai_service/__pycache__/
+ai_service/.venv/
+.venv/
+venv/
+
+# ── Expo / React Native Mobile App ─────────────────────────
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+
+# ── IDE / OS ─────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.DS_Store
+Thumbs.db
+
+# ── Logs ────────────────────────────────────────────────────
+*.log
+backend/backend-error.txt
+
+# ── Uploaded runtime files (not source) ─────────────────────
 uploads/
+backend/uploads/

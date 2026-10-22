@@ -3,8 +3,9 @@ import { AuthContext } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { LogIn, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 
-const Login = ({ setActiveTab }) => {
-  const { loginUser } = useContext(AuthContext);
+const Login = ({ setActiveTab, portal = 'donor' }) => {
+  const { loginUser, loginReceiver } = useContext(AuthContext);
+  const isReceiver = portal === 'receiver';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,9 +22,20 @@ const Login = ({ setActiveTab }) => {
 
     setLoading(true);
     try {
-      const response = await authService.login({ email, password });
-      if (response.success && response.donor) {
-        loginUser(response.donor);
+      const response = isReceiver
+        ? await authService.loginReceiver({ email, password })
+        : await authService.login({ email, password });
+      const account = isReceiver ? response.receiver : response.donor;
+      if (response.success && account) {
+        if (!response.token) {
+          setError('Authentication token missing from server response.');
+          return;
+        }
+        if (isReceiver) {
+          loginReceiver(account, response.token);
+        } else {
+          loginUser(account, response.token);
+        }
         setActiveTab('dashboard');
       } else {
         setError(response.message || 'Login failed.');
@@ -54,9 +66,11 @@ const Login = ({ setActiveTab }) => {
           }}>
             <LogIn size={26} />
           </div>
-          <h2 style={{ fontSize: '1.5rem', color: '#ffffff' }}>Donor Portal Login</h2>
+          <h2 style={{ fontSize: '1.5rem', color: '#ffffff' }}>
+            {isReceiver ? 'Receiver / NGO Portal Login' : 'Donor Portal Login'}
+          </h2>
           <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: '0.3rem' }}>
-            Access your surplus redistribution dashboard
+            {isReceiver ? 'Browse and request available donations' : 'Access your surplus redistribution dashboard'}
           </p>
         </div>
 
@@ -124,7 +138,7 @@ const Login = ({ setActiveTab }) => {
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '1.8rem', fontSize: '0.88rem', color: '#9ca3af' }}>
-          Don't have a donor account?{' '}
+          {isReceiver ? "Don't have a receiver account? " : "Don't have a donor account? "}
           <button 
             onClick={() => setActiveTab('register')}
             style={{ background: 'none', border: 'none', color: '#34d399', fontWeight: 600, cursor: 'pointer' }}

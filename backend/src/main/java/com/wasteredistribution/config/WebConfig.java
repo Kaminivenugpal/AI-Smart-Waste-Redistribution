@@ -3,6 +3,8 @@ package com.wasteredistribution.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.core.Ordered;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -21,7 +23,17 @@ public class WebConfig implements WebMvcConfigurer {
     private String uploadDir;
 
     @Bean
-    public CorsFilter corsFilter() {
+    public FilterRegistrationBean<SessionAuthFilter> sessionAuthFilterRegistration(
+            SessionAuthFilter sessionAuthFilter) {
+        FilterRegistrationBean<SessionAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(sessionAuthFilter);
+        registration.addUrlPatterns("/api/*");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
@@ -32,7 +44,11 @@ public class WebConfig implements WebMvcConfigurer {
         config.setExposedHeaders(List.of("Authorization", "Link", "X-Total-Count"));
         
         source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+        FilterRegistrationBean<CorsFilter> registration =
+                new FilterRegistrationBean<>(new CorsFilter(source));
+        registration.addUrlPatterns("/*");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return registration;
     }
 
     @Override

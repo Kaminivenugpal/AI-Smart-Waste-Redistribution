@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
@@ -6,11 +6,19 @@ import Register from './components/Register';
 import DonorDashboard from './components/DonorDashboard';
 import AddItemForm from './components/AddItemForm';
 import AnalysisResultCard from './components/AnalysisResultCard';
+import ReceiverDashboard from './components/ReceiverDashboard';
 
 const MainContent = () => {
-  const { donor, loading } = useContext(AuthContext);
+  const { donor, receiver, loading } = useContext(AuthContext);
+  const [activePortal, setActivePortal] = useState('donor');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedAnalysisResult, setSelectedAnalysisResult] = useState(null);
+
+  useEffect(() => {
+    if (!loading && receiver && !donor) {
+      setActivePortal('receiver');
+    }
+  }, [loading, donor, receiver]);
 
   if (loading) {
     return (
@@ -32,6 +40,16 @@ const MainContent = () => {
 
   // Render view based on authentication & active tab
   const renderTabContent = () => {
+    if (activePortal === 'receiver') {
+      if (!receiver) {
+        if (activeTab === 'register') {
+          return <Register portal="receiver" setActiveTab={setActiveTab} />;
+        }
+        return <Login portal="receiver" setActiveTab={setActiveTab} />;
+      }
+      return <ReceiverDashboard />;
+    }
+
     if (!donor) {
       if (activeTab === 'register') {
         return <Register setActiveTab={setActiveTab} />;
@@ -65,7 +83,12 @@ const MainContent = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        activePortal={activePortal}
+        setActivePortal={setActivePortal}
+      />
       <main style={{ flex: 1, padding: '1rem 0' }}>
         {renderTabContent()}
       </main>
@@ -76,7 +99,7 @@ const MainContent = () => {
         color: '#6b7280',
         fontSize: '0.85rem'
       }}>
-        AI Smart Waste Redistribution Platform • Module 1 (AI Surplus Item Analysis Engine)
+        AI Smart Waste Redistribution Platform • Modules 1-4
       </footer>
     </div>
   );
